@@ -11,6 +11,8 @@ const candidateSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   phone: z.string().optional(),
+  linkedinUrl: z.string().optional(),
+  whatsapp: z.string().optional(),
   resumeUrl: z.string().optional(),
   source: z.string().optional(),
   tags: z.array(z.string()).optional(),

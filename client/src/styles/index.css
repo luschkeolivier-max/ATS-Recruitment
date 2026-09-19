@@ -46,6 +46,37 @@ a {
   font-size: 18px;
 }
 
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-mark {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.brand-lg {
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.brand-lg .brand-mark {
+  height: 40px;
+}
+
+.brand-lg .brand-name {
+  font-size: 20px;
+}
+
 .navbar-links {
   display: flex;
   gap: 16px;
@@ -126,6 +157,59 @@ a {
 .auth-card h1 {
   margin: 0 0 4px;
   font-size: 22px;
+}
+
+.auth-page-wide {
+  align-items: flex-start;
+  padding-block: 40px;
+}
+
+.auth-card-wide {
+  width: 560px;
+  max-width: 100%;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  margin-top: 2px;
+}
+
+.question-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.question-list li {
+  margin-bottom: 2px;
+}
+
+.alert-success {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.two-col-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .two-col-fields {
+    grid-template-columns: 1fr;
+  }
 }
 
 .auth-switch {

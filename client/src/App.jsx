@@ -3,6 +3,7 @@ import NavBar from './components/NavBar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ApplyProfile from './pages/ApplyProfile';
 import JobsList from './pages/JobsList';
 import JobDetail from './pages/JobDetail';
 import CandidatesList from './pages/CandidatesList';
@@ -17,6 +18,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/apply" element={<ApplyProfile />} />
 
           <Route
             path="/jobs"

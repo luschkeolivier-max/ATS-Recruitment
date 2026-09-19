@@ -99,6 +99,8 @@ function CandidateFormModal({ onClose, onCreated }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [resumeUrl, setResumeUrl] = useState('');
   const [source, setSource] = useState('');
   const [tags, setTags] = useState('');
@@ -114,6 +116,8 @@ function CandidateFormModal({ onClose, onCreated }) {
         name,
         email,
         phone,
+        linkedinUrl,
+        whatsapp,
         resumeUrl,
         source,
         tags: tags
@@ -144,6 +148,14 @@ function CandidateFormModal({ onClose, onCreated }) {
         <label>
           Phone
           <input value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </label>
+        <label>
+          LinkedIn URL
+          <input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} />
+        </label>
+        <label>
+          WhatsApp number
+          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
         </label>
         <label>
           Resume URL

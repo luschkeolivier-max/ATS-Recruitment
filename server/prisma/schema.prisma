@@ -64,15 +64,26 @@ model Job {
 }
 
 model Candidate {
-  id        String   @id @default(uuid())
-  name      String
-  email     String
-  phone     String?
-  resumeUrl String?
-  source    String?
-  tags      String[] @default([])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(uuid())
+  name          String
+  email         String
+  phone         String?
+  linkedinUrl   String?
+  whatsapp      String?
+  resumeUrl     String?
+  videoIntroUrl String?
+  source        String?
+  tags          String[]  @default([])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Auto-extracted from the uploaded resume via the Claude API — see
+  // src/services/resumeParser.js. Null until parsed (or if parsing is
+  // unavailable / fails).
+  resumeSummary      String?
+  resumeSkills       String[] @default([])
+  resumeAchievements String[] @default([])
+  resumeParsedAt     DateTime?
 
   applications Application[]
 
