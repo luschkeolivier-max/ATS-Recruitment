@@ -46,6 +46,37 @@ a {
   font-size: 18px;
 }
 
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-mark {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.brand-lg {
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.brand-lg .brand-mark {
+  height: 40px;
+}
+
+.brand-lg .brand-name {
+  font-size: 20px;
+}
+
 .navbar-links {
   display: flex;
   gap: 16px;

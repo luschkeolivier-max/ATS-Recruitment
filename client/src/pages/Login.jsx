@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Brand from '../components/Brand';
 
 export default function Login() {
   const { login, user } = useAuth();
@@ -29,6 +30,7 @@ export default function Login() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
+        <Brand size="lg" />
         <h1>Sign in</h1>
         {error && <div className="alert-error">{error}</div>}
         <label>

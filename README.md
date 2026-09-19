@@ -1,4 +1,4 @@
-# ATS Recruitment
+# Voltra Global
 
 A full-stack Applicant Tracking System: post jobs, manage candidates, track applicants through
 a hiring pipeline, schedule interviews, and leave feedback — with role-based access for admins,

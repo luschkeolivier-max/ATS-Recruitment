@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Brand from './Brand';
 
 export default function NavBar() {
   const { user, logout } = useAuth();
@@ -14,7 +15,7 @@ export default function NavBar() {
 
   return (
     <header className="navbar">
-      <div className="navbar-brand">ATS Recruitment</div>
+      <div className="navbar-brand"><Brand /></div>
       <nav className="navbar-links">
         <NavLink to="/jobs" className={({ isActive }) => (isActive ? 'active' : '')}>
           Jobs
