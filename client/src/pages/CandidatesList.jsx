@@ -101,6 +101,7 @@ function CandidateFormModal({ onClose, onCreated }) {
   const [phone, setPhone] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
   const [resumeUrl, setResumeUrl] = useState('');
   const [source, setSource] = useState('');
   const [tags, setTags] = useState('');
@@ -112,19 +113,18 @@ function CandidateFormModal({ onClose, onCreated }) {
     setSubmitting(true);
     setError('');
     try {
-      await api.post('/candidates', {
-        name,
-        email,
-        phone,
-        linkedinUrl,
-        whatsapp,
-        resumeUrl,
-        source,
-        tags: tags
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean),
-      });
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('phone', phone);
+      formData.append('linkedinUrl', linkedinUrl);
+      formData.append('whatsapp', whatsapp);
+      formData.append('source', source);
+      formData.append('tags', tags);
+      if (resumeFile) formData.append('resume', resumeFile);
+      else formData.append('resumeUrl', resumeUrl);
+
+      await api.postForm('/candidates', formData);
       onCreated();
     } catch (err) {
       setError(err.message);
@@ -158,9 +158,19 @@ function CandidateFormModal({ onClose, onCreated }) {
           <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
         </label>
         <label>
-          Resume URL
-          <input value={resumeUrl} onChange={(e) => setResumeUrl(e.target.value)} />
+          Résumé (PDF)
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+          />
         </label>
+        {!resumeFile && (
+          <label>
+            Or paste a résumé link instead
+            <input value={resumeUrl} onChange={(e) => setResumeUrl(e.target.value)} placeholder="https://..." />
+          </label>
+        )}
         <label>
           Source
           <input

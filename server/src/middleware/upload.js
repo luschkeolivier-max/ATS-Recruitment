@@ -43,6 +43,14 @@ const uploadCandidateProfile = multer({
   { name: 'video', maxCount: 1 },
 ]);
 
+// A single, optional résumé upload for the staff "new candidate" form —
+// unlike uploadCandidateProfile, no file is required here.
+const uploadResumeOnly = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: RESUME_MAX_BYTES },
+}).single('resume');
+
 // multer's per-field limits aren't configurable via `.fields()`, so re-check
 // the resume's actual size after upload.
 function enforceResumeSizeLimit(req, res, next) {
@@ -56,6 +64,7 @@ function enforceResumeSizeLimit(req, res, next) {
 
 module.exports = {
   uploadCandidateProfile,
+  uploadResumeOnly,
   enforceResumeSizeLimit,
   UPLOAD_ROOT,
   RESUME_MAX_BYTES,
