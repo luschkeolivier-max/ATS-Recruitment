@@ -24,6 +24,12 @@ recruiters, and interviewers.
   Hired/Rejected) with drag-and-drop stage changes and a full audit trail of stage transitions.
 - **Interviews & notes** — schedule interviews with an interviewer, record feedback and a 1–5
   rating, and leave freeform notes on any application.
+- **Client showcase & interview requests** — each candidate has a shareable, public, redacted
+  profile link (first name only, video intro, summary, skills, achievements, and a redacted
+  resume with contact details stripped) for hiring managers to review without seeing how to
+  contact the candidate directly. A "Request an interview" button lets them propose a date/time
+  (24 hours' notice minimum), which staff review and confirm/decline from the Interview Requests
+  page.
 
 ## Project layout
 
@@ -67,9 +73,10 @@ apply for themselves from `/apply` — no account needed.
 ### Resume auto-parsing (optional)
 
 Set `ANTHROPIC_API_KEY` in `server/.env` to enable automatic resume parsing on the `/apply` form —
-the uploaded PDF is sent to the Claude API to extract a summary, skills, and achievements, stored
-on the candidate record. Without a key, profile creation still works exactly the same; those three
-fields just stay empty until filled in manually.
+the uploaded PDF is sent to the Claude API to extract a summary, skills, achievements, and a
+redacted, plain-text rendition of the resume (name/email/phone/address/links replaced with
+"[redacted]", everything else preserved) for the client showcase page. Without a key, profile
+creation still works exactly the same; those fields just stay empty until filled in manually.
 
 Uploaded resumes and videos are stored on local disk under `server/uploads/` and served at
 `/uploads/...`. For a production deployment, swap this for cloud storage (S3 or similar) — local
@@ -87,9 +94,12 @@ Endpoints under `/api` require a `Authorization: Bearer <token>` header, except 
 | Jobs | `GET/POST /jobs`, `GET/PATCH/DELETE /jobs/:id` |
 | Candidates | `GET/POST /candidates`, `GET/PATCH/DELETE /candidates/:id` |
 | Public candidate profile | `POST /public/candidates` (multipart: `name`, `email`, `phone`, `linkedinUrl`, `whatsapp`, `resume` file, `video` file) — no auth |
+| Public client showcase | `GET /public/candidates/:id/showcase` (redacted view), `POST /public/candidates/:id/interview-requests` (`requesterName`, `companyName`, `requesterEmail`, `roleTitle`, `scheduledAt` ≥ 24h out) — no auth |
 | Applications | `GET/POST /applications`, `GET/DELETE /applications/:id`, `PATCH /applications/:id/stage` |
 | Interviews | `GET/POST /interviews`, `PATCH/DELETE /interviews/:id` |
+| Interview requests | `GET /interview-requests?status=`, `PATCH /interview-requests/:id` (`status`) |
 | Notes | `POST /notes`, `DELETE /notes/:id` |
 
 Creating/editing jobs, candidates, and applications requires the `ADMIN` or `RECRUITER` role.
 Interviewers can update the interviews assigned to them (status, feedback, rating) and leave notes.
+Confirming or declining an interview request also requires `ADMIN` or `RECRUITER`.
