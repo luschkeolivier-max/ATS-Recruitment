@@ -159,6 +159,59 @@ a {
   font-size: 22px;
 }
 
+.auth-page-wide {
+  align-items: flex-start;
+  padding-block: 40px;
+}
+
+.auth-card-wide {
+  width: 560px;
+  max-width: 100%;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  margin-top: 2px;
+}
+
+.question-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.question-list li {
+  margin-bottom: 2px;
+}
+
+.alert-success {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.two-col-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .two-col-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
 .auth-switch {
   font-size: 13px;
   color: var(--text-muted);

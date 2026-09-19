@@ -52,6 +52,9 @@ export default function Login() {
         <p className="auth-switch">
           No account? <Link to="/register">Register</Link>
         </p>
+        <p className="auth-switch">
+          Applying for a job? <Link to="/apply">Create your candidate profile</Link>
+        </p>
       </form>
     </div>
   );

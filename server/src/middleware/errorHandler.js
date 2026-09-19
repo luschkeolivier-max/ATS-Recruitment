@@ -1,8 +1,16 @@
+const multer = require('multer');
 const AppError = require('../utils/AppError');
 
 function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-vars
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({ error: err.message });
+  }
+
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'File is too large.' });
+    }
+    return res.status(400).json({ error: err.message || 'Invalid file upload.' });
   }
 
   if (err.code === 'P2002') {

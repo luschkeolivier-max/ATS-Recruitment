@@ -42,8 +42,14 @@ export default function CandidateDetail() {
         <h1>{candidate.name}</h1>
         <div className="detail-meta">
           <span>{candidate.email}</span>
-          {candidate.phone && <span>{candidate.phone}</span>}
+          {candidate.phone && <span>Contact: {candidate.phone}</span>}
+          {candidate.whatsapp && <span>WhatsApp: {candidate.whatsapp}</span>}
           {candidate.source && <span>Source: {candidate.source}</span>}
+          {candidate.linkedinUrl && (
+            <a href={candidate.linkedinUrl} target="_blank" rel="noreferrer">
+              LinkedIn
+            </a>
+          )}
           {candidate.resumeUrl && (
             <a href={candidate.resumeUrl} target="_blank" rel="noreferrer">
               Resume
@@ -68,6 +74,52 @@ export default function CandidateDetail() {
           </div>
         )}
       </div>
+
+      {candidate.videoIntroUrl && (
+        <div className="section">
+          <h2>Video introduction</h2>
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video src={candidate.videoIntroUrl} controls style={{ width: '100%', maxWidth: 480, borderRadius: 8 }} />
+        </div>
+      )}
+
+      {(candidate.resumeSummary || candidate.resumeSkills?.length > 0 || candidate.resumeAchievements?.length > 0) && (
+        <div className="section">
+          <h2>From their resume</h2>
+          {candidate.resumeSummary && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                Summary
+              </div>
+              <p style={{ margin: 0, fontSize: 14 }}>{candidate.resumeSummary}</p>
+            </div>
+          )}
+          {candidate.resumeSkills?.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                Tools and skills
+              </div>
+              {candidate.resumeSkills.map((s) => (
+                <span key={s} className="tag">
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+          {candidate.resumeAchievements?.length > 0 && (
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                Achievements
+              </div>
+              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14 }}>
+                {candidate.resumeAchievements.map((a, i) => (
+                  <li key={i}>{a}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="section">
         <h2>Applications</h2>
