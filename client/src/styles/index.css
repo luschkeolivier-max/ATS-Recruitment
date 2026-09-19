@@ -510,6 +510,28 @@ textarea {
   font-size: 16px;
 }
 
+.showcase-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.showcase-topbar {
+  padding: 20px 0;
+  margin-bottom: 8px;
+}
+
+.redacted-resume {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 0;
+  max-height: 480px;
+  overflow-y: auto;
+  color: var(--text);
+}
+
 .note-item {
   border-bottom: 1px solid var(--border);
   padding: 10px 0;

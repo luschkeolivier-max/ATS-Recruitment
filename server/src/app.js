@@ -8,6 +8,7 @@ const candidateRoutes = require('./routes/candidates.routes');
 const publicCandidateRoutes = require('./routes/publicCandidates.routes');
 const applicationRoutes = require('./routes/applications.routes');
 const interviewRoutes = require('./routes/interviews.routes');
+const interviewRequestRoutes = require('./routes/interviewRequests.routes');
 const noteRoutes = require('./routes/notes.routes');
 const errorHandler = require('./middleware/errorHandler');
 const { UPLOAD_ROOT } = require('./middleware/upload');
@@ -27,6 +28,7 @@ app.use('/api/candidates', candidateRoutes);
 app.use('/api/public/candidates', publicCandidateRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/interviews', interviewRoutes);
+app.use('/api/interview-requests', interviewRequestRoutes);
 app.use('/api/notes', noteRoutes);
 
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));

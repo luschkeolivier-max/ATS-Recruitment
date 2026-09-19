@@ -57,6 +57,7 @@ router.post(
           resumeSummary: extracted.summary,
           resumeSkills: extracted.skills,
           resumeAchievements: extracted.achievements,
+          redactedResumeText: extracted.redactedResumeText,
           resumeParsedAt: new Date().toISOString(),
         },
       });
@@ -65,6 +66,62 @@ router.post(
     res.status(201).json({
       candidate: { id: finalCandidate.id, name: finalCandidate.name, email: finalCandidate.email },
     });
+  })
+);
+
+// Public, redacted candidate showcase — the link a recruiter shares with a
+// hiring manager for a specific candidate. Deliberately omits anything that
+// would let a client contact the candidate directly or learn their surname.
+router.get(
+  '/:id/showcase',
+  asyncHandler(async (req, res) => {
+    const candidate = await prisma.candidate.findUnique({ where: { id: req.params.id } });
+    if (!candidate) throw new AppError(404, 'Candidate not found');
+
+    res.json({
+      candidate: {
+        id: candidate.id,
+        firstName: candidate.name.trim().split(/\s+/)[0],
+        videoIntroUrl: candidate.videoIntroUrl,
+        summary: candidate.resumeSummary,
+        skills: candidate.resumeSkills,
+        achievements: candidate.resumeAchievements,
+        redactedResumeText: candidate.redactedResumeText,
+      },
+    });
+  })
+);
+
+const MIN_NOTICE_HOURS = 24;
+
+const interviewRequestSchema = z.object({
+  requesterName: z.string().min(1, 'Name and surname is required'),
+  companyName: z.string().min(1, 'Company name is required'),
+  requesterEmail: z.string().email(),
+  roleTitle: z.string().min(1, 'Position / role is required'),
+  scheduledAt: z.coerce.date(),
+});
+
+// A hiring manager requesting an interview from the showcase page above.
+router.post(
+  '/:id/interview-requests',
+  asyncHandler(async (req, res) => {
+    const candidate = await prisma.candidate.findUnique({ where: { id: req.params.id } });
+    if (!candidate) throw new AppError(404, 'Candidate not found');
+
+    const parsed = interviewRequestSchema.safeParse(req.body);
+    if (!parsed.success) throw new AppError(400, parsed.error.issues[0].message);
+
+    const minAllowed = new Date(Date.now() + MIN_NOTICE_HOURS * 60 * 60 * 1000);
+    if (parsed.data.scheduledAt < minAllowed) {
+      throw new AppError(400, `Interviews require at least ${MIN_NOTICE_HOURS} hours' notice`);
+    }
+
+    const request = await prisma.interviewRequest.create({
+      data: { ...parsed.data, candidateId: candidate.id },
+    });
+
+    res.status(201).json({ interviewRequest: { id: request.id } });
   })
 );
 

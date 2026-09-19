@@ -8,7 +8,9 @@ import JobsList from './pages/JobsList';
 import JobDetail from './pages/JobDetail';
 import CandidatesList from './pages/CandidatesList';
 import CandidateDetail from './pages/CandidateDetail';
+import CandidateShowcase from './pages/CandidateShowcase';
 import ApplicationDetail from './pages/ApplicationDetail';
+import InterviewRequests from './pages/InterviewRequests';
 
 export default function App() {
   return (
@@ -19,6 +21,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/apply" element={<ApplyProfile />} />
+          <Route path="/candidates/:candidateId/showcase" element={<CandidateShowcase />} />
 
           <Route
             path="/jobs"
@@ -57,6 +60,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ApplicationDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interview-requests"
+            element={
+              <ProtectedRoute>
+                <InterviewRequests />
               </ProtectedRoute>
             }
           />

@@ -68,6 +68,15 @@ export default function CandidateDetail() {
             <button className="btn-primary" onClick={() => setShowApply(true)}>
               + Apply to job
             </button>
+            <a
+              className="btn-secondary"
+              href={`/candidates/${candidateId}/showcase`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+            >
+              View client showcase link
+            </a>
             <button className="btn-danger" onClick={handleDelete}>
               Delete candidate
             </button>

@@ -34,6 +34,12 @@ enum InterviewStatus {
   CANCELED
 }
 
+enum InterviewRequestStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+}
+
 model User {
   id           String   @id @default(uuid())
   name         String
@@ -83,11 +89,32 @@ model Candidate {
   resumeSummary      String?
   resumeSkills       String[] @default([])
   resumeAchievements String[] @default([])
+  redactedResumeText String?
   resumeParsedAt     DateTime?
 
-  applications Application[]
+  applications      Application[]
+  interviewRequests InterviewRequest[]
 
   @@unique([email])
+}
+
+// A hiring manager's request to interview a candidate, submitted from the
+// public, redacted client showcase page (see routes/publicCandidates.routes.js).
+// Staff review and confirm/decline these from the Interview Requests page;
+// confirming does not itself create an Interview — a recruiter still
+// schedules that against the relevant Application.
+model InterviewRequest {
+  id              String                 @id @default(uuid())
+  candidate       Candidate              @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidateId     String
+  requesterName   String
+  companyName     String
+  requesterEmail  String
+  roleTitle       String
+  scheduledAt     DateTime
+  status          InterviewRequestStatus @default(PENDING)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
 }
 
 model Application {
