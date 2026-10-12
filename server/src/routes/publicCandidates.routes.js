@@ -15,6 +15,7 @@ const profileSchema = z.object({
   phone: z.string().min(1, 'Contact number is required'),
   linkedinUrl: z.string().url('Enter a valid LinkedIn URL'),
   whatsapp: z.string().min(1, 'WhatsApp number is required'),
+  jobId: z.string().optional(),
 });
 
 // Public candidate self-service profile creation — no auth. A candidate
@@ -38,14 +39,31 @@ router.post(
     const existing = await prisma.candidate.findUnique({ where: { email: parsed.data.email } });
     if (existing) throw new AppError(409, 'A profile with this email already exists');
 
+    const { jobId, ...profileData } = parsed.data;
+    let job = null;
+    if (jobId) {
+      job = await prisma.job.findUnique({ where: { id: jobId } });
+      if (!job || job.status !== 'OPEN') throw new AppError(404, 'That job is no longer open');
+    }
+
     const candidate = await prisma.candidate.create({
       data: {
-        ...parsed.data,
-        source: 'Candidate self-signup',
+        ...profileData,
+        source: job ? `Career page (${job.title})` : 'Candidate self-signup',
         resumeUrl: `/uploads/resumes/${resumeFile.filename}`,
         videoIntroUrl: `/uploads/videos/${videoFile.filename}`,
       },
     });
+
+    if (job) {
+      const now = new Date().toISOString();
+      const application = await prisma.application.create({
+        data: { candidateId: candidate.id, jobId: job.id, stage: 'APPLIED', createdAt: now, updatedAt: now },
+      });
+      await prisma.stageHistory.create({
+        data: { applicationId: application.id, fromStage: null, toStage: 'APPLIED' },
+      });
+    }
 
     // Best-effort: parsing failures never block profile creation.
     const extracted = await parseResumePdf(fs.readFileSync(resumeFile.path));

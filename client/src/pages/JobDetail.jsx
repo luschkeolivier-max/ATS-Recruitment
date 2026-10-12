@@ -68,6 +68,7 @@ export default function JobDetail() {
       <div className="detail-header">
         <h1>{job.title}</h1>
         <div className="detail-meta">
+          {job.company && <Link to={`/companies/${job.company.id}`}>{job.company.name}</Link>}
           {job.department && <span>{job.department}</span>}
           {job.location && <span>{job.location}</span>}
           <span className={`badge ${statusClass[job.status] || ''}`}>{job.status}</span>

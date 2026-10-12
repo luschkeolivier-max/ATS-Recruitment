@@ -30,6 +30,20 @@ recruiters, and interviewers.
   contact the candidate directly. A "Request an interview" button lets them propose a date/time
   (24 hours' notice minimum), which staff review and confirm/decline from the Interview Requests
   page.
+- **Client CRM** — track client companies (industry, website, status: prospect/active/inactive),
+  their contacts, and which jobs belong to them. Jobs can optionally be linked to a company.
+- **Placements & billing** — mark an application "placed" (candidate, company, start date,
+  salary, and a percentage or flat fee), which auto-advances the application to `HIRED`. The
+  Placements page lists every placement with a status (pending/invoiced/paid) and a running
+  total/paid revenue summary.
+- **Candidate search & hotlists** — search matches name, email, and resume summary; a separate
+  skill/tag filter does exact matching against both manual tags and AI-extracted resume skills.
+  Hotlists are reusable, named shortlists of candidates (e.g. "Top Go engineers") that any
+  recruiter can add candidates to from a candidate's profile.
+- **Public career page** — `/careers` lists every open requisition (with client company,
+  department, location) for anyone to browse, without an account. Applying from a specific job
+  (`/careers/:jobId` → "Apply for this role") pre-fills `/apply` and automatically creates the
+  Application once the profile is submitted, instead of just a standalone candidate profile.
 
 ## Project layout
 
@@ -91,15 +105,21 @@ Endpoints under `/api` require a `Authorization: Bearer <token>` header, except 
 | --- | --- |
 | Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` |
 | Users | `GET /users?role=` |
-| Jobs | `GET/POST /jobs`, `GET/PATCH/DELETE /jobs/:id` |
-| Candidates | `GET/POST /candidates`, `GET/PATCH/DELETE /candidates/:id` |
-| Public candidate profile | `POST /public/candidates` (multipart: `name`, `email`, `phone`, `linkedinUrl`, `whatsapp`, `resume` file, `video` file) — no auth |
+| Jobs | `GET/POST /jobs` (`companyId` optional), `GET/PATCH/DELETE /jobs/:id` |
+| Candidates | `GET/POST /candidates` (`search`, `tag`, `skill` filters), `GET/PATCH/DELETE /candidates/:id` |
+| Public candidate profile | `POST /public/candidates` (multipart: `name`, `email`, `phone`, `linkedinUrl`, `whatsapp`, `jobId` optional, `resume` file, `video` file) — no auth; with `jobId`, also creates the Application |
 | Public client showcase | `GET /public/candidates/:id/showcase` (redacted view), `POST /public/candidates/:id/interview-requests` (`requesterName`, `companyName`, `requesterEmail`, `roleTitle`, `scheduledAt` ≥ 24h out) — no auth |
+| Public career page | `GET /public/jobs`, `GET /public/jobs/:id` — open jobs only, no auth |
 | Applications | `GET/POST /applications`, `GET/DELETE /applications/:id`, `PATCH /applications/:id/stage` |
 | Interviews | `GET/POST /interviews`, `PATCH/DELETE /interviews/:id` |
 | Interview requests | `GET /interview-requests?status=`, `PATCH /interview-requests/:id` (`status`) |
 | Notes | `POST /notes`, `DELETE /notes/:id` |
+| Companies | `GET/POST /companies`, `GET/PATCH/DELETE /companies/:id`, `POST /companies/:id/contacts` |
+| Contacts | `PATCH/DELETE /contacts/:id` |
+| Placements | `GET/POST /placements` (creating one sets the application to `HIRED`), `PATCH/DELETE /placements/:id` |
+| Hotlists | `GET/POST /hotlists`, `GET/DELETE /hotlists/:id`, `POST /hotlists/:id/members`, `DELETE /hotlists/:id/members/:candidateId` |
 
-Creating/editing jobs, candidates, and applications requires the `ADMIN` or `RECRUITER` role.
-Interviewers can update the interviews assigned to them (status, feedback, rating) and leave notes.
-Confirming or declining an interview request also requires `ADMIN` or `RECRUITER`.
+Creating/editing jobs, candidates, companies, placements, and hotlists requires the `ADMIN` or
+`RECRUITER` role. Interviewers can update the interviews assigned to them (status, feedback,
+rating) and leave notes. Confirming or declining an interview request also requires `ADMIN` or
+`RECRUITER`.

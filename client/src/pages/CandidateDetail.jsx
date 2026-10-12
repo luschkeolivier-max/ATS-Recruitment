@@ -12,6 +12,7 @@ export default function CandidateDetail() {
   const [candidate, setCandidate] = useState(null);
   const [error, setError] = useState('');
   const [showApply, setShowApply] = useState(false);
+  const [showHotlist, setShowHotlist] = useState(false);
 
   const load = async () => {
     try {
@@ -77,6 +78,9 @@ export default function CandidateDetail() {
             >
               View client showcase link
             </a>
+            <button className="btn-secondary" onClick={() => setShowHotlist(true)}>
+              + Add to hotlist
+            </button>
             <button className="btn-danger" onClick={handleDelete}>
               Delete candidate
             </button>
@@ -160,7 +164,87 @@ export default function CandidateDetail() {
           }}
         />
       )}
+
+      {showHotlist && (
+        <AddToHotlistModal candidateId={candidateId} onClose={() => setShowHotlist(false)} />
+      )}
     </div>
+  );
+}
+
+function AddToHotlistModal({ candidateId, onClose }) {
+  const [hotlists, setHotlists] = useState([]);
+  const [hotlistId, setHotlistId] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  useEffect(() => {
+    api
+      .get('/hotlists')
+      .then((data) => {
+        setHotlists(data.hotlists);
+        if (data.hotlists.length > 0) setHotlistId(data.hotlists[0].id);
+      })
+      .catch((err) => setError(err.message));
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!hotlistId) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      await api.post(`/hotlists/${hotlistId}/members`, { candidateId });
+      setAdded(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal title="Add to hotlist" onClose={onClose}>
+      {added ? (
+        <>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Added to the hotlist.</p>
+          <div className="modal-actions">
+            <button className="btn-primary" onClick={onClose}>
+              Done
+            </button>
+          </div>
+        </>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {error && <div className="alert-error">{error}</div>}
+          {hotlists.length === 0 ? (
+            <div className="empty-state">
+              No hotlists yet. Create one from the <Link to="/hotlists">Hotlists</Link> page.
+            </div>
+          ) : (
+            <label>
+              Hotlist
+              <select value={hotlistId} onChange={(e) => setHotlistId(e.target.value)}>
+                {hotlists.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <div className="modal-actions">
+            <button type="button" className="btn-secondary" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary" disabled={submitting || hotlists.length === 0}>
+              {submitting ? 'Adding...' : 'Add'}
+            </button>
+          </div>
+        </form>
+      )}
+    </Modal>
   );
 }
 
