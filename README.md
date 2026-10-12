@@ -31,6 +31,12 @@ recruiters, and interviewers.
   (24 hours' notice minimum), which staff review and confirm/decline from the Interview Requests
   page.
 
+- **Marketing website** — public Voltra Global site at `/` (home, `/employers`, `/talent`,
+  `/about`, `/contact`). The contact page's "Request talent" form posts to
+  `POST /api/public/inquiries` and stores an `Inquiry` record (run `npm run prisma:migrate`).
+  Marketing code lives in `client/src/marketing/` and `client/src/styles/marketing.css`.
+  Staff sign in via the "Staff login" link; `/jobs` and the rest of the ATS are unchanged.
+
 ## Project layout
 
 ```

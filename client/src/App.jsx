@@ -1,4 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import MarketingLayout from './marketing/MarketingLayout';
+import Home from './marketing/Home';
+import Employers from './marketing/Employers';
+import Talent from './marketing/Talent';
+import About from './marketing/About';
+import Contact from './marketing/Contact';
 import NavBar from './components/NavBar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -13,6 +19,21 @@ import ApplicationDetail from './pages/ApplicationDetail';
 import InterviewRequests from './pages/InterviewRequests';
 
 export default function App() {
+  return (
+    <Routes>
+      <Route element={<MarketingLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/employers" element={<Employers />} />
+        <Route path="/talent" element={<Talent />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Route>
+      <Route path="*" element={<AppShell />} />
+    </Routes>
+  );
+}
+
+function AppShell() {
   return (
     <div className="app-shell">
       <NavBar />
@@ -72,8 +93,7 @@ export default function App() {
             }
           />
 
-          <Route path="/" element={<Navigate to="/jobs" replace />} />
-          <Route path="*" element={<Navigate to="/jobs" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>
