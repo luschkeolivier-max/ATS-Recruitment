@@ -75,7 +75,7 @@ export default function JobsList() {
               <div>
                 <div className="list-card-title">{job.title}</div>
                 <div className="list-card-meta">
-                  {[job.department, job.location].filter(Boolean).join(' · ') || 'No details'}
+                  {[job.company?.name, job.department, job.location].filter(Boolean).join(' · ') || 'No details'}
                   {' · '}
                   {job._count.applications} application{job._count.applications === 1 ? '' : 's'}
                 </div>
@@ -105,15 +105,24 @@ function JobFormModal({ onClose, onCreated }) {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('OPEN');
+  const [companyId, setCompanyId] = useState('');
+  const [companies, setCompanies] = useState([]);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    api
+      .get('/companies')
+      .then((data) => setCompanies(data.companies))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError('');
     try {
-      await api.post('/jobs', { title, department, location, description, status });
+      await api.post('/jobs', { title, department, location, description, status, companyId });
       onCreated();
     } catch (err) {
       setError(err.message);
@@ -129,6 +138,17 @@ function JobFormModal({ onClose, onCreated }) {
         <label>
           Title
           <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+        </label>
+        <label>
+          Client company
+          <select value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
+            <option value="">No company</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Department

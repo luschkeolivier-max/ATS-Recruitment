@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import Modal from '../components/Modal';
+
+const PLACEMENT_STATUS_CLASS = { PENDING: 'badge-draft', INVOICED: 'badge-draft', PAID: 'badge-open' };
 
 const STAGES = ['APPLIED', 'SCREENING', 'INTERVIEW', 'OFFER', 'HIRED', 'REJECTED'];
 
@@ -132,6 +135,8 @@ export default function ApplicationDetail() {
         <InterviewsSection application={application} canManage={canManage} onChanged={load} />
       </div>
 
+      <PlacementSection application={application} canManage={canManage} onChanged={load} />
+
       <div className="section">
         <h2>Stage history</h2>
         {application.stageHistory.length === 0 ? (
@@ -143,7 +148,7 @@ export default function ApplicationDetail() {
                 {h.fromStage ? `${h.fromStage} → ${h.toStage}` : `Created as ${h.toStage}`}
               </div>
               <div className="note-meta">
-                {h.changedBy.name} · {new Date(h.createdAt).toLocaleString()}
+                {h.changedBy?.name || 'Candidate (applied directly)'} · {new Date(h.createdAt).toLocaleString()}
               </div>
             </div>
           ))
@@ -265,6 +270,171 @@ function InterviewsSection({ application, canManage, onChanged }) {
         ))
       )}
     </div>
+  );
+}
+
+function PlacementSection({ application, canManage, onChanged }) {
+  const [showForm, setShowForm] = useState(false);
+  const placement = application.placement;
+
+  const feeLabel = (p) =>
+    p.feeType === 'PERCENTAGE' ? `${p.feePercentage ?? 0}% of salary` : `${p.currency} ${p.feeAmount ?? 0} flat`;
+
+  const updateStatus = async (status) => {
+    await api.patch(`/placements/${placement.id}`, { status });
+    onChanged();
+  };
+
+  return (
+    <div className="section">
+      <h2>Placement</h2>
+      {placement ? (
+        <div className="note-item">
+          <div>
+            Starts {new Date(placement.startDate).toLocaleDateString()}
+            {placement.salary ? ` · Salary ${placement.currency} ${placement.salary}` : ''} · Fee:{' '}
+            {feeLabel(placement)}
+          </div>
+          <div className="note-meta" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className={`badge ${PLACEMENT_STATUS_CLASS[placement.status]}`}>{placement.status}</span>
+            {canManage && (
+              <select value={placement.status} onChange={(e) => updateStatus(e.target.value)}>
+                <option value="PENDING">Pending</option>
+                <option value="INVOICED">Invoiced</option>
+                <option value="PAID">Paid</option>
+              </select>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="empty-state">Not placed yet.</div>
+          {canManage && (
+            <button className="btn-primary btn-sm" style={{ marginTop: 10 }} onClick={() => setShowForm(true)}>
+              Mark as placed
+            </button>
+          )}
+        </>
+      )}
+      {showForm && (
+        <PlacementFormModal
+          application={application}
+          onClose={() => setShowForm(false)}
+          onCreated={() => {
+            setShowForm(false);
+            onChanged();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function PlacementFormModal({ application, onClose, onCreated }) {
+  const [companyId, setCompanyId] = useState(application.job.company?.id || '');
+  const [companies, setCompanies] = useState([]);
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [salary, setSalary] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [feeType, setFeeType] = useState('PERCENTAGE');
+  const [feePercentage, setFeePercentage] = useState('20');
+  const [feeAmount, setFeeAmount] = useState('');
+  const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    api
+      .get('/companies')
+      .then((data) => setCompanies(data.companies))
+      .catch(() => {});
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError('');
+    try {
+      await api.post('/placements', {
+        applicationId: application.id,
+        companyId: companyId || undefined,
+        startDate,
+        salary: salary || undefined,
+        currency,
+        feeType,
+        feePercentage: feeType === 'PERCENTAGE' ? feePercentage : undefined,
+        feeAmount: feeType === 'FLAT' ? feeAmount : undefined,
+        notes,
+      });
+      onCreated();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal title="Mark as placed" onClose={onClose}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {error && <div className="alert-error">{error}</div>}
+        <label>
+          Client company
+          <select value={companyId} onChange={(e) => setCompanyId(e.target.value)}>
+            <option value="">No company</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Start date
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+        </label>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <label style={{ flex: 1 }}>
+            Salary
+            <input type="number" value={salary} onChange={(e) => setSalary(e.target.value)} />
+          </label>
+          <label style={{ width: 90 }}>
+            Currency
+            <input value={currency} onChange={(e) => setCurrency(e.target.value)} />
+          </label>
+        </div>
+        <label>
+          Fee type
+          <select value={feeType} onChange={(e) => setFeeType(e.target.value)}>
+            <option value="PERCENTAGE">Percentage of salary</option>
+            <option value="FLAT">Flat fee</option>
+          </select>
+        </label>
+        {feeType === 'PERCENTAGE' ? (
+          <label>
+            Fee percentage
+            <input type="number" step="0.5" value={feePercentage} onChange={(e) => setFeePercentage(e.target.value)} />
+          </label>
+        ) : (
+          <label>
+            Fee amount
+            <input type="number" value={feeAmount} onChange={(e) => setFeeAmount(e.target.value)} />
+          </label>
+        )}
+        <label>
+          Notes
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </label>
+        <div className="modal-actions">
+          <button type="button" className="btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="btn-primary" disabled={submitting}>
+            {submitting ? 'Saving...' : 'Save placement'}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 

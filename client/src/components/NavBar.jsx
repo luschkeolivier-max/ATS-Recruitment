@@ -23,8 +23,17 @@ export default function NavBar() {
         <NavLink to="/candidates" className={({ isActive }) => (isActive ? 'active' : '')}>
           Candidates
         </NavLink>
+        <NavLink to="/companies" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Companies
+        </NavLink>
+        <NavLink to="/placements" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Placements
+        </NavLink>
+        <NavLink to="/hotlists" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Hotlists
+        </NavLink>
         <NavLink to="/interview-requests" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Interview Requests
+          Requests
         </NavLink>
       </nav>
       <div className="navbar-user">

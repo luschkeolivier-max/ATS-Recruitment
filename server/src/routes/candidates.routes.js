@@ -31,7 +31,7 @@ router.use(authenticate);
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const { search, tag } = req.query;
+    const { search, tag, skill } = req.query;
     const where = {
       AND: [
         search
@@ -39,10 +39,13 @@ router.get(
               OR: [
                 { name: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
+                { resumeSummary: { contains: search, mode: 'insensitive' } },
+                { resumeAchievements: { has: search } },
               ],
             }
           : {},
         tag ? { tags: { has: tag } } : {},
+        skill ? { OR: [{ resumeSkills: { has: skill } }, { tags: { has: skill } }] } : {},
       ],
     };
     const candidates = await prisma.candidate.findMany({

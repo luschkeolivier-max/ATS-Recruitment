@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import Brand from '../components/Brand';
 
 export default function ApplyProfile() {
+  const [searchParams] = useSearchParams();
+  const jobId = searchParams.get('jobId') || '';
+  const [job, setJob] = useState(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -14,6 +17,14 @@ export default function ApplyProfile() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!jobId) return;
+    api
+      .get(`/public/jobs/${jobId}`)
+      .then((data) => setJob(data.job))
+      .catch(() => {});
+  }, [jobId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +39,7 @@ export default function ApplyProfile() {
     formData.append('phone', phone);
     formData.append('linkedinUrl', linkedinUrl);
     formData.append('whatsapp', whatsapp);
+    if (jobId) formData.append('jobId', jobId);
     formData.append('resume', resume);
     formData.append('video', video);
 
@@ -49,8 +61,9 @@ export default function ApplyProfile() {
           <Brand size="lg" />
           <h1>Thanks for applying!</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-            We've received your profile, resume, and video introduction. A recruiter will review
-            it and reach out if there's a match.
+            We've received your profile, resume, and video introduction
+            {job ? ` for ${job.title}` : ''}. A recruiter will review it and reach out if there's a
+            match.
           </p>
         </div>
       </div>
@@ -61,9 +74,12 @@ export default function ApplyProfile() {
     <div className="auth-page auth-page-wide">
       <form className="auth-card auth-card-wide" onSubmit={handleSubmit}>
         <Brand size="lg" />
-        <h1>Create your candidate profile</h1>
+        <h1>{job ? `Apply for ${job.title}` : 'Create your candidate profile'}</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: -8 }}>
-          Tell us about yourself so recruiters can match you to open roles.
+          {job
+            ? [job.company?.name, job.department, job.location].filter(Boolean).join(' · ') ||
+              'Tell us about yourself and we’ll match you to this role.'
+            : 'Tell us about yourself so recruiters can match you to open roles.'}
         </p>
         {error && <div className="alert-error">{error}</div>}
 

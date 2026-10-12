@@ -48,7 +48,7 @@ router.get(
       where: { id: req.params.id },
       include: {
         candidate: true,
-        job: true,
+        job: { include: { company: { select: { id: true, name: true } } } },
         notes: { include: { author: { select: { id: true, name: true } } }, orderBy: { createdAt: 'desc' } },
         interviews: {
           include: { interviewer: { select: { id: true, name: true } } },
@@ -58,6 +58,7 @@ router.get(
           include: { changedBy: { select: { id: true, name: true } } },
           orderBy: { createdAt: 'asc' },
         },
+        placement: true,
       },
     });
     if (!application) throw new AppError(404, 'Application not found');

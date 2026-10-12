@@ -7,12 +7,15 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
+const emptyToUndefined = (val) => (val === '' ? undefined : val);
+
 const jobSchema = z.object({
   title: z.string().min(1),
   department: z.string().optional(),
   location: z.string().optional(),
   description: z.string().optional(),
   status: z.enum(['DRAFT', 'OPEN', 'CLOSED']).optional(),
+  companyId: z.preprocess(emptyToUndefined, z.string().optional()),
 });
 
 router.use(authenticate);
@@ -40,6 +43,7 @@ router.get(
       orderBy: { createdAt: 'desc' },
       include: {
         createdBy: { select: { id: true, name: true } },
+        company: { select: { id: true, name: true } },
         _count: { select: { applications: true } },
       },
     });
@@ -52,7 +56,10 @@ router.get(
   asyncHandler(async (req, res) => {
     const job = await prisma.job.findUnique({
       where: { id: req.params.id },
-      include: { createdBy: { select: { id: true, name: true } } },
+      include: {
+        createdBy: { select: { id: true, name: true } },
+        company: { select: { id: true, name: true } },
+      },
     });
     if (!job) throw new AppError(404, 'Job not found');
     res.json({ job });

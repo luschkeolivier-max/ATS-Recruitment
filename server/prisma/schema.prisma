@@ -40,6 +40,23 @@ enum InterviewRequestStatus {
   DECLINED
 }
 
+enum CompanyStatus {
+  PROSPECT
+  ACTIVE
+  INACTIVE
+}
+
+enum PlacementStatus {
+  PENDING
+  INVOICED
+  PAID
+}
+
+enum FeeType {
+  PERCENTAGE
+  FLAT
+}
+
 model User {
   id           String   @id @default(uuid())
   name         String
@@ -52,6 +69,45 @@ model User {
   notes             Note[]        @relation("NoteAuthor")
   interviewsGiven   Interview[]   @relation("InterviewInterviewer")
   stageChanges      StageHistory[] @relation("StageChangedBy")
+  companiesCreated  Company[]     @relation("CompanyCreatedBy")
+  placementsCreated Placement[]   @relation("PlacementCreatedBy")
+  hotlistsCreated   Hotlist[]     @relation("HotlistCreatedBy")
+}
+
+// A client company — the "CRM" half of the system. Jobs and placements can
+// optionally be tied to one; it's optional on Job so existing/unscoped
+// requisitions keep working without a client on file.
+model Company {
+  id          String        @id @default(uuid())
+  name        String
+  industry    String?
+  website     String?
+  address     String?
+  notes       String?
+  status      CompanyStatus @default(PROSPECT)
+  createdBy   User          @relation("CompanyCreatedBy", fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  contacts   Contact[]
+  jobs       Job[]
+  placements Placement[]
+
+  @@unique([name])
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+  name      String
+  title     String?
+  email     String?
+  phone     String?
+  isPrimary Boolean  @default(false)
+  notes     String?
+  createdAt DateTime @default(now())
 }
 
 model Job {
@@ -61,6 +117,8 @@ model Job {
   location    String?
   description String?
   status      JobStatus @default(OPEN)
+  company     Company?  @relation(fields: [companyId], references: [id])
+  companyId   String?
   createdBy   User      @relation("JobCreatedBy", fields: [createdById], references: [id])
   createdById String
   createdAt   DateTime  @default(now())
@@ -92,8 +150,9 @@ model Candidate {
   redactedResumeText String?
   resumeParsedAt     DateTime?
 
-  applications      Application[]
-  interviewRequests InterviewRequest[]
+  applications       Application[]
+  interviewRequests  InterviewRequest[]
+  hotlistMemberships HotlistMember[]
 
   @@unique([email])
 }
@@ -130,8 +189,56 @@ model Application {
   notes         Note[]
   interviews    Interview[]
   stageHistory  StageHistory[]
+  placement     Placement?
 
   @@unique([candidateId, jobId])
+}
+
+// Created once an Application's candidate is hired, to track the fee owed
+// and its payment status — the "billing" half of the placements feature.
+// One placement per application (@unique on applicationId).
+model Placement {
+  id            String          @id @default(uuid())
+  application   Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationId String          @unique
+  company       Company?        @relation(fields: [companyId], references: [id])
+  companyId     String?
+  startDate     DateTime
+  salary        Float?
+  currency      String          @default("USD")
+  feeType       FeeType         @default(PERCENTAGE)
+  feePercentage Float?
+  feeAmount     Float?
+  status        PlacementStatus @default(PENDING)
+  notes         String?
+  createdBy     User            @relation("PlacementCreatedBy", fields: [createdById], references: [id])
+  createdById   String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+// A saved, reusable shortlist of candidates (e.g. "Top Go engineers",
+// "Shortlist for Acme Corp Q3").
+model Hotlist {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdBy   User     @relation("HotlistCreatedBy", fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime @default(now())
+
+  members HotlistMember[]
+}
+
+model HotlistMember {
+  id          String    @id @default(uuid())
+  hotlist     Hotlist   @relation(fields: [hotlistId], references: [id], onDelete: Cascade)
+  hotlistId   String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  candidateId String
+  addedAt     DateTime  @default(now())
+
+  @@unique([hotlistId, candidateId])
 }
 
 model StageHistory {
@@ -140,8 +247,10 @@ model StageHistory {
   applicationId String
   fromStage     Stage?
   toStage       Stage
-  changedBy     User        @relation("StageChangedBy", fields: [changedById], references: [id])
-  changedById   String
+  // Null when the stage change came from an unauthenticated public action
+  // (e.g. a candidate applying to a job from the career page).
+  changedBy     User?       @relation("StageChangedBy", fields: [changedById], references: [id])
+  changedById   String?
   createdAt     DateTime    @default(now())
 }
 

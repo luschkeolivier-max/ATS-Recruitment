@@ -11,6 +11,13 @@ import CandidateDetail from './pages/CandidateDetail';
 import CandidateShowcase from './pages/CandidateShowcase';
 import ApplicationDetail from './pages/ApplicationDetail';
 import InterviewRequests from './pages/InterviewRequests';
+import CompaniesList from './pages/CompaniesList';
+import CompanyDetail from './pages/CompanyDetail';
+import Placements from './pages/Placements';
+import HotlistsList from './pages/HotlistsList';
+import HotlistDetail from './pages/HotlistDetail';
+import Careers from './pages/Careers';
+import CareerJobDetail from './pages/CareerJobDetail';
 
 export default function App() {
   return (
@@ -22,6 +29,8 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/apply" element={<ApplyProfile />} />
           <Route path="/candidates/:candidateId/showcase" element={<CandidateShowcase />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/careers/:jobId" element={<CareerJobDetail />} />
 
           <Route
             path="/jobs"
@@ -68,6 +77,46 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <InterviewRequests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/companies"
+            element={
+              <ProtectedRoute>
+                <CompaniesList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/companies/:companyId"
+            element={
+              <ProtectedRoute>
+                <CompanyDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/placements"
+            element={
+              <ProtectedRoute>
+                <Placements />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hotlists"
+            element={
+              <ProtectedRoute>
+                <HotlistsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hotlists/:hotlistId"
+            element={
+              <ProtectedRoute>
+                <HotlistDetail />
               </ProtectedRoute>
             }
           />

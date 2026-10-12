@@ -9,6 +9,7 @@ export default function CandidatesList() {
   const canManage = user && ['ADMIN', 'RECRUITER'].includes(user.role);
   const [candidates, setCandidates] = useState([]);
   const [search, setSearch] = useState('');
+  const [skill, setSkill] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -18,6 +19,7 @@ export default function CandidatesList() {
     try {
       const params = new URLSearchParams();
       if (search) params.set('search', search);
+      if (skill) params.set('skill', skill);
       const data = await api.get(`/candidates?${params.toString()}`);
       setCandidates(data.candidates);
     } catch (err) {
@@ -31,7 +33,7 @@ export default function CandidatesList() {
     const timeout = setTimeout(load, 250);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, skill]);
 
   return (
     <div>
@@ -46,9 +48,14 @@ export default function CandidatesList() {
 
       <div className="toolbar">
         <input
-          placeholder="Search by name or email..."
+          placeholder="Search by name, email, or resume summary..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+        />
+        <input
+          placeholder="Filter by skill or tag (exact match)..."
+          value={skill}
+          onChange={(e) => setSkill(e.target.value)}
         />
       </div>
 
@@ -70,7 +77,7 @@ export default function CandidatesList() {
                   {c._count.applications === 1 ? '' : 's'}
                 </div>
                 <div style={{ marginTop: 6 }}>
-                  {c.tags.map((t) => (
+                  {[...new Set([...c.tags, ...(c.resumeSkills || [])])].map((t) => (
                     <span key={t} className="tag">
                       {t}
                     </span>
